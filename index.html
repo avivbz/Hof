@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>חיפוש מורים</title>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            background: linear-gradient(to bottom right, #e0f2ff, #f0e6ff);
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .container {
+            background: white;
+            padding: 2rem;
+            border-radius: 1rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            max-width: 500px;
+            width: 90%;
+        }
+        h1 {
+            color: #1e40af;
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+        input {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid #ccc;
+            border-radius: 0.5rem;
+            font-size: 1rem;
+        }
+        button {
+            width: 100%;
+            padding: 0.75rem;
+            background: #2563eb;
+            color: white;
+            border: none;
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        button:hover {
+            background: #1d4ed8;
+        }
+        .result {
+            margin-top: 2rem;
+            padding: 1rem;
+            background: #f8fafc;
+            border-radius: 0.5rem;
+            display: none;
+        }
+        .error {
+            background: #fee2e2;
+            color: #991b1b;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin-top: 1rem;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>חיפוש מורים</h1>
+        <form id="searchForm">
+            <div class="form-group">
+                <label>שם פרטי:</label>
+                <input type="text" id="firstName" required>
+            </div>
+            <div class="form-group">
+                <label>שם משפחה:</label>
+                <input type="text" id="lastName" >
+            </div>
+            <button type="submit">חפש</button>
+        </form>
+        <div id="result" class="result"></div>
+        <div id="error" class="error"></div>
+    </div>
+
+    <script>
+        const teacherData = [
+            {firstName: "יאיר", lastName: "אברהם", group: "אזרחות", room: "4"},
+            {firstName: "מאי", lastName: "אולמן", group: "מתמטיקה2", room: "3"},
+            {firstName: "איילת", lastName: "אורון-גוטמרק", group: "אנגלית 1", room: "1"},
+            {firstName: "אביחי", lastName: "אחרק", group: "מתמטיקה1", room: "2"},
+            {firstName: "נירית", lastName: "אלחדף לוי", group: "אדם וחברה + היסטוריה", room: "1"},
+            {firstName: "נופר", lastName: "אלטמן", group: "מתמטיקה1", room: "2"},
+            {firstName: "אמיר", lastName: "אליאס", group: "מתמטיקה2", room: "3"},
+            {firstName: "דורית", lastName: "אלעד", group: "חנ\"ג", room: "3"},
+            {firstName: "כנרת", lastName: "אמבר", group: "מתמטיקה2", room: "3"},
+            {firstName: "מיכל", lastName: "אמסלם", group: "אדם וחברה + היסטוריה", room: "1"},
+            {firstName: "גלית", lastName: "ארדיטי", group: "לשון + ערבית", room: "4"},
+            {firstName: "אסנת", lastName: "ארז", group: "אזרחות", room: "4"},
+            {firstName: "טניה", lastName: "ארצי", group: "מגמות + מדעים", room: "5"},
+            {firstName: "עידן", lastName: "אש אנגל", group: "אזרחות", room: "4"},
+            {firstName: "איתי", lastName: "אשר", group: "אנגלית 1", room: "1"},
+            {firstName: "לימור", lastName: "בג'יו", group: "לשון + ערבית", room: "4"},
+            {firstName: "חגי", lastName: "בורשטיין", group: "מתמטיקה1", room: "2"},
+            {firstName: "שמרית", lastName: "בירן", group: "מתמטיקה2", room: "3"},
+            {firstName: "עדי", lastName: "בלומנפלד", group: "ספרות + ארון הספרים + תנ\"ך", room: "2"},
+            {firstName: "דוד", lastName: "בן דור", group: "אדם וחברה + היסטוריה", room: "1"},
+            {firstName: "איריס", lastName: "בן זאב", group: "לשון + ערבית", room: "4"},
+            {firstName: "יקטרינה", lastName: "בסיס", group: "מתמטיקה2", room: "3"},
+            {firstName: "אפרת", lastName: "בצלאל", group: "אנגלית 2", room: "5"},
+            {firstName: "נורית", lastName: "בראון צפריר", group: "לשון + ערבית", room: "4"},
+            {firstName: "ליהי", lastName: "בראש", group: "אנגלית 1", room: "1"},
+            {firstName: "אילנית", lastName: "גולדשטיין", group: "אדם וחברה + היסטוריה", room: "1"},
+            {firstName: "ענת", lastName: "גולוב", group: "לשון + ערבית", room: "4"},
+            {firstName: "שירי", lastName: "גולן", group: "מתמטיקה1", room: "2"},
+            {firstName: "דודי", lastName: "גולן", group: "אנגלית 1", room: "1"},
+            {firstName: "שרית", lastName: "גור", group: "ספרות + ארון הספרים + תנ\"ך", room: "2"},
+            {firstName: "אדריאנה", lastName: "גורן", group: "מגמות + מדעים", room: "5"},
+            {firstName: "רים", lastName: "גזמאווי", group: "לשון + ערבית", room: "4"},
+            {firstName: "ארז", lastName: "גטניו", group: "חנ\"ג", room: "3"},
+            {firstName: "יעל", lastName: "גיידה", group: "ספרות + ארון הספרים + תנ\"ך", room: "2"},
+            {firstName: "יפעת", lastName: "גלבוע", group: "אדם וחברה + היסטוריה", room: "1"},
+            {firstName: "חן", lastName: "גלדסטון", group: "מגמות + מדעים", room: "5"},
+            {firstName: "רותי", lastName: "גנצרסקי", group: "מגמות + מדעים", room: "5"},
+            {firstName: "הדיל", lastName: "גרבאן", group: "מגמות + מדעים", room: "5"},
+            {firstName: "רוני", lastName: "גרינברג", group: "לשון + ערבית", room: "4"},
+            {firstName: "ענבר", lastName: "דביר", group: "אזרחות", room: "4"},
+            {firstName: "אורית", lastName: "הויבן", group: "מגמות + מדעים", room: "5"},
+            {firstName: "איציק", lastName: "הופמן", group: "אדם וחברה + היסטוריה", room: "1"},
+            {firstName: "אורי", lastName: "הלוי", group: "לשון + ערבית", room: "4"},
+            {firstName: "גלי", lastName: "הראל לוי", group: "מגמות + מדעים", room: "5"},
+            {firstName: "שרי", lastName: "הראל", group: "ספרות + ארון הספרים + תנ\"ך", room: "2"},
+            {firstName: "תמי", lastName: "הרפז", group: "אנגלית 2", room: "5"},
+            {firstName: "משה", lastName: "הרשקו", group: "חנ\"ג", room: "3"},
+            {firstName: "יניב", lastName: "ויצמן", group: "חנ\"ג", room: "3"},
+            {firstName: "מיכל", lastName: "חבה גואטה", group: "אנגלית 1", room: "1"},
+            {firstName: "טליה", lastName: "טרייבר אהרונסון", group: "אזרחות", room: "4"},
+            {firstName: "מור", lastName: "יהל", group: "לשון + ערבית", room: "4"},
+            {firstName: "מירב", lastName: "שולמן", group: "מתמטיקה2", room: "3"},
+            {firstName: "מרים", lastName: "יחזקאלי", group: "חנ\"ג", room: "3"},
+            {firstName: "מירי", lastName: "ינאי", group: "אנגלית 2", room: "5"},
+            {firstName: "נטע", lastName: "יעקבי", group: "חנ\"ג", room: "3"},
+            {firstName: "רונית", lastName: "יצחק", group: "אנגלית 1", room: "1"},
+            {firstName: "אביטל", lastName: "יראל תדהר", group: "ספרות + ארון הספרים + תנ\"ך", room: "2"},
+            {firstName: "אבלין", lastName: "כץ", group: "אנגלית 2", room: "5"},
+            {firstName: "דניאל", lastName: "לוטן", group: "אזרחות", room: "4"},
+            {firstName: "גלי", lastName: "לוי", group: "מגמות + מדעים", room: "5"},
+            {firstName: "שיר", lastName: "לוי", group: "לשון + ערבית", room: "4"},
+            {firstName: "קרן", lastName: "ליפינסקי-קלע", group: "לשון + ערבית", room: "4"},
+            {firstName: "שירלי", lastName: "לסינגר", group: "מתמטיקה2", room: "3"},
+            {firstName: "יורי", lastName: "מוגילבסקי", group: "מגמות + מדעים", room: "5"},
+            {firstName: "ענבר", lastName: "מולכו", group: "ספרות + ארון הספרים + תנ\"ך", room: "2"},
+            {firstName: "שרון", lastName: "מועלם", group: "ספרות + ארון הספרים + תנ\"ך", room: "2"},
+            {firstName: "אלה", lastName: "מזרחי", group: "אנגלית 2", room: "5"},
+            {firstName: "מירב", lastName: "מילר", group: "לשון + ערבית", room: "4"},
+            {firstName: "דניאל", lastName: "מילשטיין", group: "אדם וחברה + היסטוריה", room: "1"},
+            {firstName: "קארין", lastName: "מלך", group: "אדם וחברה + היסטוריה", room: "1"},
+            {firstName: "סמיה", lastName: "מסראוה", group: "לשון + ערבית", room: "4"},
+            {firstName: "דביר", lastName: "מעוז", group: "מגמות + מדעים", room: "5"},
+            {firstName: "עידן", lastName: "מקבי", group: "אדם וחברה + היסטוריה", room: "1"},
+            {firstName: "עופר", lastName: "ניב", group: "מגמות + מדעים", room: "5"},
+            {firstName: "איילת", lastName: "נען", group: "אזרחות", room: "4"},
+            {firstName: "עידן", lastName: "סבן", group: "אנגלית 1", room: "1"},
+            {firstName: "עינת", lastName: "סולומון", group: "אדם וחברה + היסטוריה", room: "1"},
+            {firstName: "סנדרה", lastName: "סטרו סמואל", group: "אנגלית 2", room: "5"},
+            {firstName: "רינת", lastName: "סינגר עזר", group: "אנגלית 2", room: "5"},
+            {firstName: "שגיא", lastName: "סלונים", group: "ספרות + ארון הספרים + תנ\"ך", room: "2"},
+            {firstName: "חגית", lastName: "סלע", group: "לשון + ערבית", room: "4"},
+            {firstName: "שרון", lastName: "סמר", group: "מתמטיקה1", room: "2"},
+            {firstName: "אפרת", lastName: "סנוף", group: "מגמות + מדעים", room: "5"},
+            {firstName: "לילך", lastName: "סער", group: "", room: ""},
+            {firstName: "מתן", lastName: "סקר", group: "אדם וחברה + היסטוריה", room: "1"},
+            {firstName: "סהר", lastName: "עיראקי", group: "מגמות + מדעים", room: "5"},
+            {firstName: "מיכל", lastName: "פרח", group: "מתמטיקה1", room: "2"},
+            {firstName: "עדי", lastName: "פרטוש", group: "ספרות + ארון הספרים + תנ\"ך", room: "2"},
+            {firstName: "חן", lastName: "פרי", group: "מתמטיקה2", room: "3"},
+            {firstName: "קארין", lastName: "פרידמן", group: "לשון + ערבית", room: "4"},
+            {firstName: "ליאת", lastName: "פרל צרפתי", group: "אנגלית 1", room: "1"},
+            {firstName: "ענת", lastName: "פרנקו", group: "מתמטיקה1", room: "2"},
+            {firstName: "עפרה", lastName: "צבי", group: "אנגלית 2", room: "5"},
+            {firstName: "אירנה", lastName: "צימליכמן", group: "מתמטיקה2", room: "3"},
+            {firstName: "רקפת", lastName: "קונוואי גליק", group: "אנגלית 1", room: "1"},
+            {firstName: "אוסמה", lastName: "קטאווי", group: "לשון + ערבית", room: "4"},
+            {firstName: "אופיר", lastName: "קייזמן", group: "מתמטיקה1", room: "2"},
+            {firstName: "רן", lastName: "קירזון", group: "מגמות + מדעים", room: "5"},
+            {firstName: "אפרת", lastName: "קמינר", group: "ספרות + ארון הספרים + תנ\"ך", room: "2"},
+            {firstName: "ליאור", lastName: "קרן", group: "אנגלית 2", room: "5"},
+            {firstName: "מיכל", lastName: "ראובן", group: "מתמטיקה1", room: "2"},
+            {firstName: "עידן", lastName: "רוזנבליט", group: "חנ\"ג", room: "3"},
+            {firstName: "אביב", lastName: "רויכמן", group: "מתמטיקה2", room: "3"},
+            {firstName: "תמר", lastName: "רומנו", group: "אנגלית 1", room: "1"},
+            {firstName: "אריק", lastName: "רוסו", group: "מתמטיקה1", room: "2"},
+            {firstName: "יפעת", lastName: "רותם", group: "ספרות + ארון הספרים + תנ\"ך", room: "2"},
+            {firstName: "שרון", lastName: "שביט", group: "אדם וחברה + היסטוריה", room: "1"},
+            {firstName: "גיא", lastName: "שוקרון", group: "מתמטיקה2", room: "3"},
+            {firstName: "יעל", lastName: "שחם", group: "אדם וחברה + היסטוריה", room: "1"},
+            {firstName: "רינת", lastName: "שחר", group: "אנגלית 1", room: "1"},
+            {firstName: "אלגרה", lastName: "שטיינברג", group: "מתמטיקה1", room: "2"},
+            {firstName: "חיים", lastName: "שירן", group: "חנ\"ג", room: "3"},
+            {firstName: "רעות", lastName: "שירן", group: "אזרחות", room: "4"},
+            {firstName: "רלי", lastName: "שלג", group: "מתמטיקה2", room: "3"},
+            {firstName: "ירדן צבי", lastName: "שלו", group: "חנ\"ג", room: "3"},
+            {firstName: "רוני", lastName: "שלו", group: "אזרחות", room: "4"},
+            {firstName: "חמד", lastName: "שמאי", group: "לשון + ערבית", room: "4"},
+            {firstName: "נטלי", lastName: "שר", group: "חנ\"ג", room: "3"},
+            {firstName: "ליטל", lastName: "תורן", group: "חנ\"ג", room: "3"},
+            {firstName: "שי", lastName: "תשובה", group: "מתמטיקה2", room: "3"}
+        ];
+
+        let searchLog = [];
+        
+        function saveLog() {
+            const logData = JSON.stringify(searchLog);
+            localStorage.setItem('teacherSearchLog', logData);
+            
+            // Create log file for download
+            const blob = new Blob([logData], { type: 'application/json' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = `teacher_search_log_${new Date().toISOString().slice(0,10)}.json`;
+            a.click();
+            URL.revokeObjectURL(a.href);
+        }
+
+        document.getElementById('searchForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const firstNameInput = document.getElementById('firstName').value.trim();
+            const lastNameInput = document.getElementById('lastName').value.trim();
+            
+            const resultDiv = document.getElementById('result');
+            const errorDiv = document.getElementById('error');
+            
+            const searchEntry = {
+                timestamp: new Date().toISOString(),
+                firstName: firstNameInput,
+                lastName: lastNameInput
+            };
+            
+            const exactMatch = teacherData.find(t => 
+                t.firstName.trim() === firstNameInput && 
+                t.lastName.trim() === lastNameInput
+            );
+
+            const firstNameMatches = teacherData.filter(t => 
+                t.firstName.trim() === firstNameInput
+            );
+
+            if (exactMatch && exactMatch.group && exactMatch.room) {
+                resultDiv.innerHTML = `
+                    <h2>תוצאות החיפוש:</h2>
+                    <p><strong>קבוצה:</strong> ${exactMatch.group}</p>
+                    <p><strong>חדר:</strong> ${exactMatch.room}</p>
+                `;
+                resultDiv.style.display = 'block';
+                errorDiv.style.display = 'none';
+                searchEntry.found = true;
+                searchEntry.group = exactMatch.group;
+                searchEntry.room = exactMatch.room;
+            } else if (firstNameMatches.length > 0) {
+                resultDiv.innerHTML = `
+                    <h2>לא נמצאה התאמה מדויקת. מורים עם שם פרטי "${firstNameInput}":</h2>
+                    <div class="space-y-2">
+                        ${firstNameMatches.map(t => `
+                            <div class="p-2 bg-gray-50 rounded">
+                                <p><strong>שם מלא:</strong> ${t.firstName} ${t.lastName}</p>
+                                <p><strong>קבוצה:</strong> ${t.group}</p>
+                                <p><strong>חדר:</strong> ${t.room}</p>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+                resultDiv.style.display = 'block';
+                errorDiv.style.display = 'none';
+                searchEntry.found = 'partial';
+                searchEntry.matches = firstNameMatches.length;
+            } else {
+                errorDiv.textContent = 'מורה לא נמצא במערכת';
+                errorDiv.style.display = 'block';
+                resultDiv.style.display = 'none';
+                searchEntry.found = false;
+            }
+            
+            searchLog.push(searchEntry);
+            localStorage.setItem('teacherSearchLog', JSON.stringify(searchLog));
+        });
+       
+
+        //// Save log every 5 minutes
+        //setInterval(saveLog, 5 * 60 * 1000);
+
+        //// Load previous log if exists
+        //const savedLog = localStorage.getItem('teacherSearchLog');
+        //if (savedLog) {
+        //    searchLog = JSON.parse(savedLog);
+        //}
+    </script>
+</body>
+</html>
